@@ -1,5 +1,9 @@
 *.o
 *.d
 *_demo
-.config.mk
+*.log
 trace.vcd
+trace.vcd.vpd
+obj_dir/
+.vscode/
+DVEfiles/
