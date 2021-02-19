@@ -25,23 +25,26 @@
 -include .config.mk
 
 INSTALL ?= install
-VCS_HOME = 
+
 ifneq "$(VCS_HOME)" ""
-SYSTEMC_INCLUDE ?=$(VCS_HOME)/include/systemc231/
-SYSTEMC_LIBDIR ?= $(VCS_HOME)/linux/lib
-TLM2 ?= $(VCS_HOME)/etc/systemc/tlm/
+SYSTEMC_INCLUDE =$(VCS_HOME)/include/systemc231/
+SYSTEMC_LIBDIR = $(VCS_HOME)/linux/lib
+TLM2 = $(VCS_HOME)/etc/systemc/tlm/
 
 HAVE_VERILOG=y
 HAVE_VERILOG_VERILATOR?=n
 HAVE_VERILOG_VCS=y
 else
-SYSTEMC ?= /usr/local/systemc-2.3.2/
-SYSTEMC_INCLUDE ?=$(SYSTEMC)/include/
-SYSTEMC_LIBDIR ?= $(SYSTEMC)/lib-linux64
+#SYSTEMC ?= /usr/local/systemc-2.3.2/
+#SYSTEMC_INCLUDE ?=$(SYSTEMC)/include/
+#SYSTEMC_LIBDIR ?= $(SYSTEMC)/lib-linux64
 # In case your TLM-2.0 installation is not bundled with
 # with the SystemC one.
 # TLM2 ?= /opt/systemc/TLM-2009-07-15
 endif
+
+CFLAGS += -fPIC
+CXXFLAGS += -fPIC
 
 SCML ?= /usr/local/scml-2.3/
 SCML_INCLUDE ?= $(SCML)/include/
@@ -164,7 +167,7 @@ SYSCAN=syscan -full64
 VLOGAN=vlogan -full64
 VHDLAN=vhdlan -full64
 
-VCS_SYSC_FLAGS = -cpp g++-6 -cflags "-I $(LIBSOC_PATH) -I $(LIBRP_PATH) -I$(SYSTEMC_INCLUDE)"
+VCS_SYSC_FLAGS = -cpp g++-6 -cc gcc-6 -cflags "-I $(LIBSOC_PATH) -I $(LIBRP_PATH)"
 
 CSRC_DIR = csrc
 
@@ -179,14 +182,14 @@ VHDLAN_FLAGS += $(VCS_SYSC_FLAGS)
 SYSCAN_ZYNQ_DEMO = zynq_demo.cc
 SYSCAN_ZYNQMP_DEMO = zynqmp_demo.cc
 SYSCAN_ZYNQMP_LMAC2_DEMO = zynqmp_lmac2_demo.cc
-SYSCAN_SCFILES += demo-dma.cc debugdev.cc remote-port-tlm.cc
-VCS_CFILES += remote-port-proto.c remote-port-sk.c safeio.c
+SYSCAN_SCFILES += demo-dma.cc debugdev.cc $(LIBRP_PATH)/remote-port-tlm.cc
+# VCS_CFILES += remote-port-proto.c remote-port-sk.c safeio.c
 
 SYSCAN_FLAGS += -tlm2 -sysc=opt_if
 SYSCAN_FLAGS += -cflags -DHAVE_VERILOG -cflags -DHAVE_VERILOG_VCS
 SYSCAN_FLAGS += $(VCS_SYSC_FLAGS)
 
-VCS_FLAGS += -sysc sc_main -sysc=adjust_timeres
+VCS_FLAGS += -sysc sc_main -sysc=adjust_timeres $(VCS_SYSC_FLAGS) -lca -timescale=1ps/1ps -LDFLAGS -Wl,--no-as-needed
 VFLAGS += -CFLAGS "-DHAVE_VERILOG" -CFLAGS "-DHAVE_VERILOG_VCS"
 endif
 
@@ -319,10 +322,11 @@ endif
 
 CPPFLAGS += -I $(LIBSOC_PATH)/tests
 ifeq "$(HAVE_VERILOG_VCS)" "y"
-$(TARGET_ZYNQMP_DEMO): $(VFILES)  $(SYSCAN_ZYNQMP_DEMO)
+$(TARGET_ZYNQMP_DEMO): $(VFILES)  $(SYSCAN_ZYNQMP_DEMO) $(ZYNQMP_OBJS)
 	$(VLOGAN) $(VLOGAN_FLAGS) $(VFILES)
 	$(SYSCAN) $(SYSCAN_FLAGS) $(SYSCAN_ZYNQMP_DEMO) $(SYSCAN_SCFILES)
-	$(VCS) $(VCS_FLAGS) $(VFLAGS) $(VCS_CFILES) -o $@
+	g++-6 -g -fPIC -shared -o library.so $(OBJS)
+	$(VCS) $(VCS_FLAGS) $(VFLAGS) library.so $(VCS_CFILES) -o $@
 else
 
 $(TARGET_ZYNQMP_DEMO): $(ZYNQMP_OBJS) $(VTOP_LIB) $(VERILATED_O)

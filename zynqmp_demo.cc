@@ -405,84 +405,6 @@ SC_MODULE(Top)
 		checker.rdata(al_rdata);
 		checker.rresp(al_rresp);
 
-		al->s00_axi_aclk(*clk);
-		al->s00_axi_aresetn(rst_n);
-
-		al->s00_axi_awvalid(al_awvalid);
-		al->s00_axi_awready(al_awready);
-		al->s00_axi_awaddr(al_awaddr);
-		al->s00_axi_awprot(al_awprot);
-
-		al->s00_axi_wvalid(al_wvalid);
-		al->s00_axi_wready(al_wready);
-		al->s00_axi_wdata(al_wdata);
-		al->s00_axi_wstrb(al_wstrb);
-
-		al->s00_axi_bvalid(al_bvalid);
-		al->s00_axi_bready(al_bready);
-		al->s00_axi_bresp(al_bresp);
-
-		al->s00_axi_arvalid(al_arvalid);
-		al->s00_axi_arready(al_arready);
-		al->s00_axi_araddr(al_araddr);
-		al->s00_axi_arprot(al_arprot);
-
-		al->s00_axi_rvalid(al_rvalid);
-		al->s00_axi_rready(al_rready);
-		al->s00_axi_rdata(al_rdata);
-		al->s00_axi_rresp(al_rresp);
-
-		af->s00_axi_aclk(*clk);
-		af->s00_axi_aresetn(rst_n);
-
-		af->s00_axi_awvalid(af_awvalid);
-		af->s00_axi_awready(af_awready);
-		af->s00_axi_awaddr(af_awaddr);
-		af->s00_axi_awprot(af_awprot);
-		af->s00_axi_awuser(af_awuser);
-		af->s00_axi_awregion(af_awregion);
-		af->s00_axi_awqos(af_awqos);
-		af->s00_axi_awcache(af_awcache);
-		af->s00_axi_awburst(af_awburst);
-		af->s00_axi_awsize(af_awsize);
-		af->s00_axi_awlen(af_awlen);
-		af->s00_axi_awid(af_awid);
-		af->s00_axi_awlock(af_awlock);
-
-		af->s00_axi_wvalid(af_wvalid);
-		af->s00_axi_wready(af_wready);
-		af->s00_axi_wdata(af_wdata);
-		af->s00_axi_wstrb(af_wstrb);
-		af->s00_axi_wuser(af_wuser);
-		af->s00_axi_wlast(af_wlast);
-
-		af->s00_axi_bvalid(af_bvalid);
-		af->s00_axi_bready(af_bready);
-		af->s00_axi_bresp(af_bresp);
-		af->s00_axi_buser(af_buser);
-		af->s00_axi_bid(af_bid);
-
-		af->s00_axi_arvalid(af_arvalid);
-		af->s00_axi_arready(af_arready);
-		af->s00_axi_araddr(af_araddr);
-		af->s00_axi_arprot(af_arprot);
-		af->s00_axi_aruser(af_aruser);
-		af->s00_axi_arregion(af_arregion);
-		af->s00_axi_arqos(af_arqos);
-		af->s00_axi_arcache(af_arcache);
-		af->s00_axi_arburst(af_arburst);
-		af->s00_axi_arsize(af_arsize);
-		af->s00_axi_arlen(af_arlen);
-		af->s00_axi_arid(af_arid);
-		af->s00_axi_arlock(af_arlock);
-
-		af->s00_axi_rvalid(af_rvalid);
-		af->s00_axi_rready(af_rready);
-		af->s00_axi_rdata(af_rdata);
-		af->s00_axi_rresp(af_rresp);
-		af->s00_axi_ruser(af_ruser);
-		af->s00_axi_rid(af_rid);
-		af->s00_axi_rlast(af_rlast);
 
 		tlm2axi_al->clk(*clk);
 		tlm2axi_af->clk(*clk);
@@ -620,12 +542,7 @@ int sc_main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	trace_fp = sc_create_vcd_trace_file("trace");
-	trace(trace_fp, *top, top->name());
 
 	sc_start();
-	if (trace_fp) {
-		sc_close_vcd_trace_file(trace_fp);
-	}
 	return 0;
 }
