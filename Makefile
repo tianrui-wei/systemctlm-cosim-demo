@@ -99,7 +99,7 @@ SC_OBJS += debugdev.o
 SC_OBJS += demo-dma.o
 SC_OBJS += xilinx-axidma.o
 
-LIBSOC_PATH=../libsystemctlm-soc
+LIBSOC_PATH=../lib
 CPPFLAGS += -I $(LIBSOC_PATH)
 
 LIBSOC_ZYNQ_PATH=$(LIBSOC_PATH)/zynq
@@ -159,18 +159,22 @@ endif
 endif
 
 ifeq "$(HAVE_VERILOG_VCS)" "y"
-VCS=vcs
-SYSCAN=syscan
-VLOGAN=vlogan
-VHDLAN=vhdlan
+VCS=vcs -full64
+SYSCAN=syscan -full64
+VLOGAN=vlogan -full64
+VHDLAN=vhdlan -full64
+
+VCS_SYSC_FLAGS = -cpp g++-6 -cflags "-I $(LIBSOC_PATH) -I $(LIBRP_PATH) -I$(SYSTEMC_INCLUDE)"
 
 CSRC_DIR = csrc
 
 VLOGAN_FLAGS += -sysc
 VLOGAN_FLAGS += +v2k -sc_model apb_slave_timer
+VLOGAN_FLAGS += $(VCS_SYSC_FLAGS)
 
 VHDLAN_FLAGS += -sysc
 VHDLAN_FLAGS += -sc_model apb_slave_dummy
+VHDLAN_FLAGS += $(VCS_SYSC_FLAGS)
 
 SYSCAN_ZYNQ_DEMO = zynq_demo.cc
 SYSCAN_ZYNQMP_DEMO = zynqmp_demo.cc
@@ -180,8 +184,10 @@ VCS_CFILES += remote-port-proto.c remote-port-sk.c safeio.c
 
 SYSCAN_FLAGS += -tlm2 -sysc=opt_if
 SYSCAN_FLAGS += -cflags -DHAVE_VERILOG -cflags -DHAVE_VERILOG_VCS
+SYSCAN_FLAGS += $(VCS_SYSC_FLAGS)
+
 VCS_FLAGS += -sysc sc_main -sysc=adjust_timeres
-VFLAGS += -CFLAGS "-DHAVE_VERILOG" -CFLAGS "-DHAVE_VERILOG_VERILATOR"
+VFLAGS += -CFLAGS "-DHAVE_VERILOG" -CFLAGS "-DHAVE_VERILOG_VCS"
 endif
 
 OBJS = $(C_OBJS) $(SC_OBJS)
@@ -313,7 +319,7 @@ endif
 
 CPPFLAGS += -I $(LIBSOC_PATH)/tests
 ifeq "$(HAVE_VERILOG_VCS)" "y"
-$(TARGET_ZYNQMP_DEMO): $(VFILES) $(SYSCAN_SCFILES) $(VCS_CFILES) $(SYSCAN_ZYNQMP_DEMO)
+$(TARGET_ZYNQMP_DEMO): $(VFILES)  $(SYSCAN_ZYNQMP_DEMO)
 	$(VLOGAN) $(VLOGAN_FLAGS) $(VFILES)
 	$(SYSCAN) $(SYSCAN_FLAGS) $(SYSCAN_ZYNQMP_DEMO) $(SYSCAN_SCFILES)
 	$(VCS) $(VCS_FLAGS) $(VFLAGS) $(VCS_CFILES) -o $@

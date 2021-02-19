@@ -7,3 +7,5 @@ trace.vcd.vpd
 obj_dir/
 .vscode/
 DVEfiles/
+/csrc/
+/AN.DB/
