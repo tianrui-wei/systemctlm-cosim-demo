@@ -49,12 +49,12 @@ using namespace std;
 #include "tlm-bridges/tlm2axis-bridge.h"
 #include "tlm-bridges/axis2tlm-bridge.h"
 #include "tlm-xgmii-phy.h"
+#include "vlmac.h"
 
-#ifdef HAVE_VERILOG_VERILATOR
-#include <verilated_vcd_sc.h>
-#include "Vlmac_wrapper_top.h"
-#include "verilated.h"
-#endif
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+
 
 #define NR_MASTERS	3
 #define NR_DEVICES	4
@@ -81,7 +81,7 @@ SC_MODULE(Top)
 
 	tlm2apb_bridge<bool, sc_bv, 16, sc_bv, 32> *tlm2apb_lmac;
 
-	Vlmac_wrapper_top *lmac;
+	vlmac lmac;
 	tlm_xgmii_phy phy;
 
 	sc_signal<sc_bv<64> > phy_txd;
@@ -133,7 +133,10 @@ SC_MODULE(Top)
 		rst("rst"),
 		rst_n("rst_n"),
 
-		phy("phy"),
+
+    lmac("lmac"),
+
+    phy("phy"),
 		phy_txd("phy_txd"),
 		phy_txc("phy_txc"),
 		phy_rxd("phy_rxd"),
@@ -205,7 +208,6 @@ SC_MODULE(Top)
 
 		/* Slow clock to keep simulation fast.  */
 		clk = new sc_clock("clk", sc_time(10, SC_US));
-		lmac = new Vlmac_wrapper_top("lmac");
 
 		tlm2axis.clk(*clk);
 		tlm2axis.resetn(rst_n);
@@ -225,30 +227,30 @@ SC_MODULE(Top)
 		axis2tlm.tuser(rx_axis_mac_tuser);
 		axis2tlm.tlast(rx_axis_mac_tlast);
 
-		lmac->clk(*clk);
-		lmac->rst_n(rst_n);
-		lmac->xgmii_txd(phy_txd);
-		lmac->xgmii_txc(phy_txc);
-		lmac->xgmii_rxd(phy_rxd);
-		lmac->xgmii_rxc(phy_rxc);
-		lmac->host_addr_reg(apbsig_lmac_paddr);
-		lmac->reg_rd_start(apbsig_lmac_psel);
-		lmac->reg_rd_done_out(apbsig_lmac_pready);
-		lmac->FMAC_REGDOUT(apbsig_lmac_prdata);
+		lmac.clk(*clk);
+		lmac.rst_n(rst_n);
+		lmac.xgmii_txd(phy_txd);
+		lmac.xgmii_txc(phy_txc);
+		lmac.xgmii_rxd(phy_rxd);
+		lmac.xgmii_rxc(phy_rxc);
+		lmac.host_addr_reg(apbsig_lmac_paddr);
+		lmac.reg_rd_start(apbsig_lmac_psel);
+		lmac.reg_rd_done_out(apbsig_lmac_pready);
+		lmac.FMAC_REGDOUT(apbsig_lmac_prdata);
 
-		lmac->tx_axis_mac_tdata(tx_axis_mac_tdata);
-		lmac->tx_axis_mac_tvalid(tx_axis_mac_tvalid);
-		lmac->tx_axis_mac_tlast(tx_axis_mac_tlast);
-		lmac->tx_axis_mac_tuser(tx_axis_mac_tuser);
-		lmac->tx_axis_mac_tready(tx_axis_mac_tready);
-		lmac->tx_axis_mac_tstrb(tx_axis_mac_tstrb);
+		lmac.tx_axis_mac_tdata(tx_axis_mac_tdata);
+		lmac.tx_axis_mac_tvalid(tx_axis_mac_tvalid);
+		lmac.tx_axis_mac_tlast(tx_axis_mac_tlast);
+		lmac.tx_axis_mac_tuser(tx_axis_mac_tuser);
+		lmac.tx_axis_mac_tready(tx_axis_mac_tready);
+		lmac.tx_axis_mac_tstrb(tx_axis_mac_tstrb);
 
-		lmac->rx_axis_mac_tdata(rx_axis_mac_tdata);
-		lmac->rx_axis_mac_tvalid(rx_axis_mac_tvalid);
-		lmac->rx_axis_mac_tlast(rx_axis_mac_tlast);
-		lmac->rx_axis_mac_tuser(rx_axis_mac_tuser);
-		lmac->rx_axis_mac_tready(rx_axis_mac_tready);
-		lmac->rx_axis_mac_tstrb(rx_axis_mac_tstrb);
+		lmac.rx_axis_mac_tdata(rx_axis_mac_tdata);
+		lmac.rx_axis_mac_tvalid(rx_axis_mac_tvalid);
+		lmac.rx_axis_mac_tlast(rx_axis_mac_tlast);
+		lmac.rx_axis_mac_tuser(rx_axis_mac_tuser);
+		lmac.rx_axis_mac_tready(rx_axis_mac_tready);
+		lmac.rx_axis_mac_tstrb(rx_axis_mac_tstrb);
 
 		phy.tx.clk(*clk);
 		phy.tx.xxd(phy_txd);
@@ -306,6 +308,7 @@ int sc_main(int argc, char* argv[])
 		sc_start(1, SC_PS);
 		sc_stop();
 		usage();
+    std::cout << "Please specify the quantum number" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -330,7 +333,7 @@ int sc_main(int argc, char* argv[])
 	sc_start(1, SC_US);
 	top->rst.write(false);
 
-	sc_start();
+	sc_start(10000, SC_SEC);
 	if (trace_fp) {
 		sc_close_vcd_trace_file(trace_fp);
 	}

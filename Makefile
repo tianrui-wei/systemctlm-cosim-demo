@@ -136,12 +136,6 @@ VERILATOR_ROOT?=$(shell $(VERILATOR) --getenv VERILATOR_ROOT 2>/dev/null || echo
 
 VM_TRACE?=0
 VM_COVERAGE?=0
-V_LDLIBS += $(VOBJ_DIR)/Vapb_timer__ALL.a
-V_LDLIBS += $(VOBJ_DIR)/Vaxilite_dev__ALL.a
-V_LDLIBS += $(VOBJ_DIR)/Vaxifull_dev__ALL.a
-V_LDLIBS += $(VOBJ_DIR)/Vsystem__ALL.a
-LDLIBS += $(V_LDLIBS)
-VERILATED_O=$(VOBJ_DIR)/verilated.o
 
 # Gives some compatibility with vcs
 VFLAGS += --pins-bv 2 -Wno-fatal
@@ -182,6 +176,7 @@ VHDLAN_FLAGS += $(VCS_SYSC_FLAGS)
 SYSCAN_ZYNQ_DEMO = zynq_demo.cc
 SYSCAN_ZYNQMP_DEMO = zynqmp_demo.cc
 SYSCAN_ZYNQMP_LMAC2_DEMO = zynqmp_lmac2_demo.cc
+SYSCAN_RISCV_VIRT_LMAC2_DEMO = riscv_virt_lmac2_demo.cc
 SYSCAN_SCFILES += demo-dma.cc debugdev.cc $(LIBRP_PATH)/remote-port-tlm.cc
 # VCS_CFILES += remote-port-proto.c remote-port-sk.c safeio.c
 
@@ -227,35 +222,18 @@ PYSIMGEN_ARGS += --build --quiet
 TARGETS = $(TARGET_ZYNQ_DEMO) $(TARGET_ZYNQMP_DEMO) $(TARGET_VERSAL_DEMO)
 TARGETS += $(TARGET_RISCV_VIRT_TRI_DEMO)
 
-ifeq "$(HAVE_VERILOG_VERILATOR)" "y"
 #
 # LMAC2
 #
 LM2_DIR=LMAC_CORE2/LMAC2_INFO/
 
-LM_CORE = lmac_wrapper_top.v
+LM_CORE = 
 include files-lmac2.mk
 ifneq ($(wildcard $(LM2_DIR)/.),)
 TARGETS += $(TARGET_ZYNQMP_LMAC2_DEMO)
 TARGETS += $(TARGET_RISCV_VIRT_LMAC2_DEMO)
-V_LDLIBS += $(VOBJ_DIR)/Vlmac_wrapper_top__ALL.a
 ifneq ($(wildcard $(PYSIMGEN)),)
 TARGETS += $(TARGET_ZYNQMP_LMAC2_IPXACT_DEMO)
-endif
-endif
-endif
-
-ifeq "$(HAVE_VERILOG_VERILATOR)" "y"
-#
-# LMAC3
-#
-LM3_DIR=LMAC_CORE3/LMAC3_INFO/
-
-LM3_CORE = lmac3_wrapper_top.v
-include files-lmac3.mk
-ifneq ($(wildcard $(LM3_DIR)/.),)
-TARGETS += $(TARGET_RISCV_VIRT_LMAC3_DEMO)
-V_LDLIBS += $(VOBJ_DIR)/Vlmac3_wrapper_top__ALL.a
 endif
 endif
 
@@ -271,93 +249,26 @@ all: $(TARGETS)
 CFLAGS += -MMD
 CXXFLAGS += -MMD
 
-ifeq "$(HAVE_VERILOG_VERILATOR)" "y"
-include $(VERILATOR_ROOT)/include/verilated.mk
-
-$(VOBJ_DIR)/Vlmac_wrapper_top__ALL.a: $(LM_CORE)
-	$(VENV) $(VERILATOR) $(VFLAGS) $^
-	$(MAKE) -C $(VOBJ_DIR) CXXFLAGS="$(CXXFLAGS)" -f Vlmac_wrapper_top.mk
-
-$(VOBJ_DIR)/Vlmac3_wrapper_top__ALL.a: $(LM3_CORE)
-	$(VENV) $(VERILATOR) $(VFLAGS) $^
-	$(MAKE) -C $(VOBJ_DIR) CXXFLAGS="$(CXXFLAGS)" -f Vlmac3_wrapper_top.mk
-
-$(ZYNQMP_LMAC2_TOP_O): $(V_LDLIBS)
-$(ZYNQMP_LMAC3_TOP_O): $(V_LDLIBS)
-$(RISCV_VIRT_LMAC2_TOP_O): $(V_LDLIBS)
-$(RISCV_VIRT_LMAC3_TOP_O): $(V_LDLIBS)
-$(RISCV_VIRT_TRI_TOP_O): $(V_LDLIBS)
-$(ZYNQMP_TOP_O): $(V_LDLIBS)
-$(VERILATED_O): $(V_LDLIBS)
-
-$(VOBJ_DIR)/V%__ALL.a: %.v
-	$(VENV) $(VERILATOR) $(VFLAGS) $<
-	$(MAKE) -C $(VOBJ_DIR) CXXFLAGS="$(CXXFLAGS)" -f V$(<:.v=.mk)
-	$(MAKE) -C $(VOBJ_DIR) CXXFLAGS="$(CXXFLAGS)" -f V$(<:.v=.mk) verilated.o
-
-EX_AXI4LITE_PATH = $(LIBSOC_PATH)/tests/example-rtl-axi4lite
-AXILITE_DEV_V = axilite_dev.v
-VFLAGS += -y $(EX_AXI4LITE_PATH)
-
-$(VOBJ_DIR)/Vaxilite_dev__ALL.a: $(EX_AXI4LITE_PATH)/$(AXILITE_DEV_V)
-	$(VENV) $(VERILATOR) $(VFLAGS) $<
-	$(MAKE) -C $(VOBJ_DIR) CXXFLAGS="$(CXXFLAGS)" -f V$(AXILITE_DEV_V:.v=.mk)
-
-EX_AXI4_PATH = $(LIBSOC_PATH)/tests/example-rtl-axi4
-AXIFULL_DEV_V = axifull_dev.v
-VFLAGS += -y $(EX_AXI4_PATH)
-
-$(VOBJ_DIR)/Vaxifull_dev__ALL.a: $(EX_AXI4_PATH)/$(AXIFULL_DEV_V)
-	$(VENV) $(VERILATOR) $(VFLAGS) $<
-	$(MAKE) -C $(VOBJ_DIR) CXXFLAGS="$(CXXFLAGS)" -f V$(AXIFULL_DEV_V:.v=.mk)
-
-EX_TRI_PATH = $(LIBSOC_PATH)/tests/example-rtl-tri
-SYSTEM_V = system.v
-VFLAGS += -y $(EX_TRI_PATH)
-
-$(VOBJ_DIR)/Vsystem__ALL.a: $(EX_TRI_PATH)/$(SYSTEM_V)
-	$(VENV) $(VERILATOR) $(VFLAGS) --top-module $(SYSTEM_V:.v=) $<
-	$(MAKE) -C $(VOBJ_DIR) CXXFLAGS="$(CXXFLAGS)" -f V$(SYSTEM_V:.v=.mk)
-endif
-
 CPPFLAGS += -I $(LIBSOC_PATH)/tests
 ifeq "$(HAVE_VERILOG_VCS)" "y"
-$(TARGET_ZYNQMP_DEMO): $(VFILES)  $(SYSCAN_ZYNQMP_DEMO) $(ZYNQMP_OBJS)
+$(TARGET_RISCV_VIRT_LMAC2_DEMO): $(VFILES)  $(SYSCAN_RISCV_VIRT_LMAC2_DEMO) $(OBJS)
 	$(VLOGAN) $(VLOGAN_FLAGS) $(VFILES)
-	$(SYSCAN) $(SYSCAN_FLAGS) $(SYSCAN_ZYNQMP_DEMO) $(SYSCAN_SCFILES)
+	vlogan -full64 -cpp g++-6 -sysc=gen_portmap lmac_wrapper_top.v -sc_model vlmac
+	$(SYSCAN) $(SYSCAN_FLAGS) $(SYSCAN_RISCV_VIRT_LMAC2_DEMO) $(SYSCAN_SCFILES)
 	g++-6 -g -fPIC -shared -o library.so $(OBJS)
-	$(VCS) $(VCS_FLAGS) $(VFLAGS) library.so $(VCS_CFILES) -o $@
+	$(VCS) $(VCS_FLAGS) $(VFLAGS) library.so $(VCS_CFILES) $(LM_CORE) -o $@
 else
 
-$(TARGET_ZYNQMP_DEMO): $(ZYNQMP_OBJS) $(VTOP_LIB) $(VERILATED_O)
-	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
-
-$(TARGET_ZYNQMP_LMAC2_DEMO): $(ZYNQMP_LMAC2_OBJS) $(VTOP_LIB) $(VERILATED_O)
-	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 $(TARGET_ZYNQMP_LMAC2_IPXACT_DEMO):
 	$(INSTALL) -d $(ZL_IPXACT_DEMO_OUTDIR)
 	[ ! -e .config.mk ] || $(INSTALL) .config.mk $(ZL_IPXACT_DEMO_OUTDIR)
 	$(PYSIMGEN) $(PYSIMGEN_ARGS)
 
-$(TARGET_RISCV_VIRT_LMAC2_DEMO): $(RISCV_VIRT_LMAC2_OBJS) $(VTOP_LIB) $(VERILATED_O)
-	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
-
 $(TARGET_RISCV_VIRT_LMAC3_DEMO): $(RISCV_VIRT_LMAC3_OBJS) $(VTOP_LIB) $(VERILATED_O)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
-$(TARGET_RISCV_VIRT_TRI_DEMO): $(RISCV_VIRT_TRI_OBJS) $(VTOP_LIB) $(VERILATED_O)
-	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
-
 endif
-
-$(TARGET_ZYNQ_DEMO): $(ZYNQ_OBJS) $(VTOP_LIB) $(VERILATED_O)
-	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
-
-$(TARGET_VERSAL_DEMO): $(VERSAL_OBJS) $(VERILATED_O)
-	$(CXX) $(LDFLAGS) -o $@ $(VERSAL_OBJS) $(VERILATED_O) $(LDLIBS)
-
-verilated_%.o: $(VERILATOR_ROOT)/include/verilated_%.cpp
 
 clean:
 	$(RM) $(OBJS) $(OBJS:.o=.d) $(TARGETS)
