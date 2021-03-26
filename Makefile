@@ -25,7 +25,7 @@
 -include .config.mk
 
 ifneq "$(VCS_HOME)" ""
-SYSTEMC_INCLUDE ?=$(VCS_HOME)/include/systemc23/
+SYSTEMC_INCLUDE ?=$(VCS_HOME)/include/systemc231/
 SYSTEMC_LIBDIR ?= $(VCS_HOME)/linux/lib
 TLM2 ?= $(VCS_HOME)/etc/systemc/tlm/
 
@@ -83,10 +83,10 @@ SC_OBJS += demo-dma.o
 
 LIBSOC_PATH=libsystemctlm-soc
 LIBSOC_ZYNQ_PATH=$(LIBSOC_PATH)/zynq
+LIBSOC_ZYNQMP_PATH=$(LIBSOC_PATH)/zynqmp
 SC_OBJS += $(LIBSOC_ZYNQ_PATH)/xilinx-zynq.o
 CPPFLAGS += -I $(LIBSOC_ZYNQ_PATH)
 
-LIBSOC_ZYNQMP_PATH=$(LIBSOC_PATH)/zynqmp
 SC_OBJS += $(LIBSOC_ZYNQMP_PATH)/xilinx-zynqmp.o
 CPPFLAGS += -I $(LIBSOC_ZYNQMP_PATH)
 
@@ -127,27 +127,30 @@ CPPFLAGS += -I $(VOBJ_DIR)
 endif
 
 ifeq "$(HAVE_VERILOG_VCS)" "y"
-VCS=vcs
-SYSCAN=syscan
-VLOGAN=vlogan
-VHDLAN=vhdlan
+VCS=vcs -full64
+SYSCAN=syscan -full64
+VLOGAN=vlogan -full64
+VHDLAN=vhdlan -full64
+
+VCS_CXX_FLAGS = -cpp g++-6 -cc gcc-6 -cflags "-I $(LIBSOC_PATH) -I $(LIBRP_PATH) $(CPPFLAGS)"
 
 CSRC_DIR = csrc
 
-VLOGAN_FLAGS += -sysc
+VLOGAN_FLAGS += -sysc $(VCS_CXX_FLAGS)
 VLOGAN_FLAGS += +v2k -sc_model apb_slave_timer
 
-VHDLAN_FLAGS += -sysc
+VHDLAN_FLAGS += -sysc $(VCS_CXX_FLAGS)
 VHDLAN_FLAGS += -sc_model apb_slave_dummy
 
 SYSCAN_ZYNQ_DEMO = zynq_demo.cc
 SYSCAN_ZYNQMP_DEMO = zynqmp_demo.cc
-SYSCAN_SCFILES += demo-dma.cc debugdev.cc remote-port-tlm.cc
-VCS_CFILES += remote-port-proto.c remote-port-sk.c safeio.c
+SYSCAN_SCFILES += demo-dma.cc debugdev.cc $(LIBRP_PATH)/remote-port-tlm.cc $(LIBRP_PATH)/remote-port-tlm-wires.cc $(LIBRP_PATH)/remote-port-tlm-memory-slave.cc $(LIBRP_PATH)/remote-port-tlm-memory-master.cc $(LIBSOC_ZYNQMP_PATH)/xilinx-zynqmp.cc
 
-SYSCAN_FLAGS += -tlm2 -sysc=opt_if
+VCS_CFILES += $(LIBRP_PATH)/remote-port-proto.c $(LIBRP_PATH)/remote-port-sk.c $(LIBRP_PATH)/safeio.c
+
+SYSCAN_FLAGS += -tlm2 -sysc=opt_if $(VCS_CXX_FLAGS)
 SYSCAN_FLAGS += -cflags -DHAVE_VERILOG -cflags -DHAVE_VERILOG_VCS
-VCS_FLAGS += -sysc sc_main -sysc=adjust_timeres
+VCS_FLAGS += -sysc sc_main -sysc=adjust_timeres $(VCS_CXX_FLAGS) -lca
 VFLAGS += -CFLAGS "-DHAVE_VERILOG" -CFLAGS "-DHAVE_VERILOG_VERILATOR"
 endif
 
@@ -187,7 +190,7 @@ $(TOP_O): $(VFILES_CPP) $(TOP_C)
 endif
 
 ifeq "$(HAVE_VERILOG_VCS)" "y"
-$(TARGET_ZYNQMP_DEMO): $(VFILES) $(SYSCAN_SCFILES) $(VCS_CFILES) $(SYSCAN_ZYNQMP_DEMO)
+$(TARGET_ZYNQMP_DEMO): $(VFILES) $(SYSCAN_ZYNQMP_DEMO)
 	$(VLOGAN) $(VLOGAN_FLAGS) $(VFILES)
 	$(SYSCAN) $(SYSCAN_FLAGS) $(SYSCAN_ZYNQMP_DEMO) $(SYSCAN_SCFILES)
 	$(VCS) $(VCS_FLAGS) $(VFLAGS) $(VCS_CFILES) -o $@

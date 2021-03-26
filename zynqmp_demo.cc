@@ -39,7 +39,6 @@ using namespace sc_core;
 using namespace sc_dt;
 using namespace std;
 
-#include "trace.h"
 #include "iconnect.h"
 #include "debugdev.h"
 #include "demo-dma.h"
@@ -179,7 +178,6 @@ int sc_main(int argc, char* argv[])
 {
 	Top *top;
 	uint64_t sync_quantum;
-	sc_trace_file *trace_fp = NULL;
 
 #if HAVE_VERILOG_VERILATOR
 	Verilated::commandArgs(argc, argv);
@@ -202,16 +200,11 @@ int sc_main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	trace_fp = sc_create_vcd_trace_file("trace");
-	trace(trace_fp, *top, top->name());
 	/* Pull the reset signal.  */
 	top->rst.write(true);
 	sc_start(1, SC_US);
 	top->rst.write(false);
 
 	sc_start();
-	if (trace_fp) {
-		sc_close_vcd_trace_file(trace_fp);
-	}
 	return 0;
 }
