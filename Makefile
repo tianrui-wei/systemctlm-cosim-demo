@@ -132,7 +132,7 @@ SYSCAN=syscan -full64
 VLOGAN=vlogan -full64
 VHDLAN=vhdlan -full64
 
-VCS_CXX_FLAGS = -cpp g++-6 -cc gcc-6 -cflags "-I $(LIBSOC_PATH) -I $(LIBRP_PATH) $(CPPFLAGS)"
+VCS_CXX_FLAGS = -cpp g++-6 -cc gcc-6 -cflags "-I $(LIBSOC_PATH) -I $(LIBRP_PATH) $(CPPFLAGS) -g"
 
 CSRC_DIR = csrc
 
@@ -150,7 +150,7 @@ VCS_CFILES += $(LIBRP_PATH)/remote-port-proto.c $(LIBRP_PATH)/remote-port-sk.c $
 
 SYSCAN_FLAGS += -tlm2 -sysc=opt_if $(VCS_CXX_FLAGS)
 SYSCAN_FLAGS += -cflags -DHAVE_VERILOG -cflags -DHAVE_VERILOG_VCS
-VCS_FLAGS += -sysc sc_main -sysc=adjust_timeres $(VCS_CXX_FLAGS) -lca -LDFLAGS -Wl,--no-as-needed
+VCS_FLAGS += -sysc sc_main -timescale=1ns/1ps $(VCS_CXX_FLAGS) -lca -LDFLAGS -Wl,--no-as-needed -debug_access+all -diag all
 VFLAGS += -CFLAGS "-DHAVE_VERILOG" -CFLAGS "-DHAVE_VERILOG_VCS"
 endif
 

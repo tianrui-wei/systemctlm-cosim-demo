@@ -100,6 +100,7 @@ SC_MODULE(Top)
 		apbsig_timer_pwdata("apbtimer_pwdata"),
 		apbsig_timer_prdata("apbtimer_prdata")
 	{
+        printf("initializing top design\n");
 		m_qk.set_global_quantum(quantum);
 
 		zynq.rst(rst);
@@ -186,28 +187,27 @@ int sc_main(int argc, char* argv[])
 
 	if (argc < 3) {
 		sync_quantum = 10000;
-        socket_name = "unix:/tmp/qemu/qemu-rport-_amba@0_cosim@0";
+        socket_name = "unix:/tmp/qemu/qemu-rport-_machine_cosim";
 	} else {
 		sync_quantum = strtoull(argv[2], NULL, 10);
         socket_name = argv[1];
 	}
 
+    printf("setting time resolution\n");
 	sc_set_time_resolution(1, SC_PS);
 
+    printf("instantiating top design\n");
 	top = new Top("top", socket_name, sc_time((double) sync_quantum, SC_NS));
 
-	if (argc < 3) {
-		sc_start(1, SC_PS);
-		sc_stop();
-		usage();
-		exit(EXIT_FAILURE);
-	}
-
+    printf("realy to pull the reset signal\n");
 	/* Pull the reset signal.  */
 	top->rst.write(true);
+    printf("start sc_start for reset\n");
 	sc_start(1, SC_US);
 	top->rst.write(false);
 
-	sc_start();
+    printf("formal starting the design\n");
+	sc_start(10000000, SC_SEC);
+    sc_stop();
 	return 0;
 }
