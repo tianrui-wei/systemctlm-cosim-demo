@@ -136,10 +136,10 @@ VCS_CXX_FLAGS = -cpp g++-6 -cc gcc-6 -cflags "-I $(LIBSOC_PATH) -I $(LIBRP_PATH)
 
 CSRC_DIR = csrc
 
-VLOGAN_FLAGS += -sysc $(VCS_CXX_FLAGS)
+VLOGAN_FLAGS += -sysc $(VCS_CXX_FLAGS) -sysc=opt_if -sysc=gen_portmap
 VLOGAN_FLAGS += +v2k -sc_model apb_slave_timer
 
-VHDLAN_FLAGS += -sysc $(VCS_CXX_FLAGS)
+VHDLAN_FLAGS += -sysc $(VCS_CXX_FLAGS) -sysc=opt_if -sysc=gen_portmap
 VHDLAN_FLAGS += -sc_model apb_slave_dummy
 
 SYSCAN_ZYNQ_DEMO = zynq_demo.cc
@@ -150,8 +150,8 @@ VCS_CFILES += $(LIBRP_PATH)/remote-port-proto.c $(LIBRP_PATH)/remote-port-sk.c $
 
 SYSCAN_FLAGS += -tlm2 -sysc=opt_if $(VCS_CXX_FLAGS)
 SYSCAN_FLAGS += -cflags -DHAVE_VERILOG -cflags -DHAVE_VERILOG_VCS
-VCS_FLAGS += -sysc sc_main -sysc=adjust_timeres $(VCS_CXX_FLAGS) -lca
-VFLAGS += -CFLAGS "-DHAVE_VERILOG" -CFLAGS "-DHAVE_VERILOG_VERILATOR"
+VCS_FLAGS += -sysc sc_main -sysc=adjust_timeres $(VCS_CXX_FLAGS) -lca -LDFLAGS -Wl,--no-as-needed
+VFLAGS += -CFLAGS "-DHAVE_VERILOG" -CFLAGS "-DHAVE_VERILOG_VCS"
 endif
 
 OBJS = $(C_OBJS) $(SC_OBJS)

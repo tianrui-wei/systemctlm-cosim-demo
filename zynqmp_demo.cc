@@ -177,6 +177,7 @@ void usage(void)
 int sc_main(int argc, char* argv[])
 {
 	Top *top;
+    const char *socket_name;
 	uint64_t sync_quantum;
 
 #if HAVE_VERILOG_VERILATOR
@@ -185,13 +186,15 @@ int sc_main(int argc, char* argv[])
 
 	if (argc < 3) {
 		sync_quantum = 10000;
+        socket_name = "unix:/tmp/qemu/qemu-rport-_amba@0_cosim@0";
 	} else {
 		sync_quantum = strtoull(argv[2], NULL, 10);
+        socket_name = argv[1];
 	}
 
 	sc_set_time_resolution(1, SC_PS);
 
-	top = new Top("top", argv[1], sc_time((double) sync_quantum, SC_NS));
+	top = new Top("top", socket_name, sc_time((double) sync_quantum, SC_NS));
 
 	if (argc < 3) {
 		sc_start(1, SC_PS);
