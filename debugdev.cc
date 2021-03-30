@@ -72,7 +72,7 @@ void debugdev::b_transport(tlm::tlm_generic_payload& trans, sc_time& delay)
 
 		switch (addr) {
 			case 0:
-//				cout << "read " << addr << " " << t << endl;
+				cout << "read " << addr << endl;
 				v = now.to_seconds() * 1000 * 1000 * 1000;
 				break;
 			case 0xc:

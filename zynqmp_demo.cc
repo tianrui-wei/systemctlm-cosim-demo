@@ -57,6 +57,10 @@ using namespace std;
 #define NR_MASTERS	2
 #define NR_DEVICES	4
 
+#ifndef BASE_ADDR
+#define BASE_ADDR 0x28000000ULL
+#endif
+
 SC_MODULE(Top)
 {
 	iconnect<NR_MASTERS, NR_DEVICES>	*bus;
@@ -109,13 +113,13 @@ SC_MODULE(Top)
 		debug = new debugdev("debug");
 		dma = new demodma("demodma");
 
-		bus->memmap(0xa0000000ULL, 0x100 - 1,
+		bus->memmap(BASE_ADDR, 0x100 - 1,
 				ADDRMODE_RELATIVE, -1, debug->socket);
-		bus->memmap(0xa0010000ULL, 0x10 - 1,
+		bus->memmap(BASE_ADDR + 0x10000ULL, 0x10 - 1,
 				ADDRMODE_RELATIVE, -1, dma->tgt_socket);
 
 		tlm2apb_tmr = new tlm2apb_bridge<bool, sc_bv, 16, sc_bv, 32> ("tlm2apb-tmr-bridge");
-		bus->memmap(0xa0020000ULL, 0x10 - 1,
+		bus->memmap(BASE_ADDR + 0x20000ULL, 0x10 - 1,
 				ADDRMODE_RELATIVE, -1, tlm2apb_tmr->tgt_socket);
 
 		bus->memmap(0x0LL, 0xffffffff - 1,
