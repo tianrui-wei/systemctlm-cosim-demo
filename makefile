@@ -43,12 +43,12 @@ VFILES = apb_timer.v
 comp: clean
 	mkdir work -p
 	echo "compiling c++ files"
+	vlogan $(SNPS_FLAGS) -sysc -sysc=opt_if -sysc=gen_portmap apb_slave_timer.v -sc_model apb_slave_timer
 	#$(CXX) -c $(SNPS_CXXFLAGS) $(CXX_FILES)
 	syscan $(SNPS_FLAGS) -cflags "$(SNPS_CXXFLAGS)" $(CXX_FILES)
 	#syscan $(SNPS_FLAGS) -cflags "$(SNPS_CFLAGS)" $(C_FILES)
 	$(CC) -c $(SNPS_CFLAGS) $(C_FILES)
 	$(CC) -g -fPIC -shared -o libsc_hier.so *.o
-	vlogan $(SNPS_FLAGS) -sysc -sysc=opt_if -sysc=gen_portmap apb_slave_timer.v -sc_model apb_slave_timer
 	# vlogan $(SNPS_FLAGS) -sverilog -ntb_opts uvm
 	#vcs -sysc $(SNPS_FLAGS) -ntb_opts uvm -debug_access+all libsc_hier.so sc_main -lca -timescale=1ns/1ps -o simv2
 	vcs -sysc $(SNPS_FLAGS) -debug_access+all libsc_hier.so sc_main -lca -timescale=1ns/1ps -o simv2

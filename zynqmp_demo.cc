@@ -38,16 +38,15 @@
 using namespace sc_core;
 using namespace sc_dt;
 using namespace std;
-
+#define HAVE_VERILOG
+#define HAVE_VERILOG_VCS
+#include "apb_slave_timer.h"
 #include "iconnect.h"
 #include "debugdev.h"
 #include "demo-dma.h"
 #include "xilinx-zynqmp.h"
 
 #include "tlm2apb-bridge.h"
-#ifdef HAVE_VERILOG_VCS
-#include "apb_slave_timer.h"
-#endif
 
 #ifdef HAVE_VERILOG_VERILATOR
 #include "Vapb_timer.h"
