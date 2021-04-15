@@ -185,17 +185,13 @@ int sc_main(int argc, char* argv[])
     const char *socket_name;
 	uint64_t sync_quantum;
 
-#if HAVE_VERILOG_VERILATOR
-	Verilated::commandArgs(argc, argv);
-#endif
-
-	if (argc < 3) {
+//	if (argc < 3) {
 		sync_quantum = 10000;
-        socket_name = "unix:/tmp/qemu/qemu-rport-_machine_cosim";
-	} else {
-		sync_quantum = strtoull(argv[2], NULL, 10);
-        socket_name = argv[1];
-	}
+        	socket_name = "unix:/tmp/qemu/qemu-rport-_machine_cosim";
+//	} else {
+//		sync_quantum = strtoull(argv[2], NULL, 10);
+ //       	socket_name = argv[1];
+//	}
 
     printf("setting time resolution\n");
 	sc_set_time_resolution(1, SC_PS);
@@ -213,5 +209,5 @@ int sc_main(int argc, char* argv[])
     printf("formal starting the design\n");
 	sc_start(10000000, SC_SEC);
     sc_stop();
-	return 0;
+	return -8;
 }

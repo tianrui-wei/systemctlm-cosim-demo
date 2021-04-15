@@ -60,16 +60,16 @@ CPPFLAGS += -I $(TLM2)/include/tlm
 endif
 
 CPPFLAGS += -I .
-LDFLAGS = -L $(SYSTEMC_LIBDIR)
-LDLIBS   += -lsystemc
+#LDFLAGS = -L $(SYSTEMC_LIBDIR)
+#LDLIBS   += -lsystemc
 
 ZYNQ_TOP_C = zynq_demo.cc
-ZYNQ_TOP_O = $(ZYNQ_TOP_C:.cc=.o)
+#ZYNQ_TOP_O = $(ZYNQ_TOP_C:.cc=.o)
 ZYNQMP_TOP_C = zynqmp_demo.cc
-ZYNQMP_TOP_O = $(ZYNQMP_TOP_C:.cc=.o)
+#ZYNQMP_TOP_O = $(ZYNQMP_TOP_C:.cc=.o)
 
-ZYNQ_OBJS += $(ZYNQ_TOP_O)
-ZYNQMP_OBJS += $(ZYNQMP_TOP_O)
+#ZYNQ_OBJS += $(ZYNQ_TOP_O)
+#ZYNQMP_OBJS += $(ZYNQMP_TOP_O)
 
 # Uncomment to enable use of scml2
 # CPPFLAGS += -I $(SCML_INCLUDE)
@@ -190,7 +190,8 @@ $(TOP_O): $(VFILES_CPP) $(TOP_C)
 endif
 
 ifeq "$(HAVE_VERILOG_VCS)" "y"
-$(TARGET_ZYNQMP_DEMO): $(VFILES) $(SYSCAN_ZYNQMP_DEMO)
+$(TARGET_ZYNQMP_DEMO): $(VFILES)
+	g++ -c -I${PWD}/csrc/sysc/include -I${VCS_HOME}/etc/systemc/tlm/tli -DTLI_BYTE_VIEW_DEBUG  -DVCS  -I${VCS_HOME}/include/systemc231 -I${VCS_HOME}/etc/systemc/tlm/include/tlm -I${VCS_HOME}/include -I${VCS_HOME}/include/cosim/bf -fPIC
 	$(VLOGAN) $(VLOGAN_FLAGS) $(VFILES)
 	$(SYSCAN) $(SYSCAN_FLAGS) $(SYSCAN_ZYNQMP_DEMO) $(SYSCAN_SCFILES)
 	$(VCS) $(VCS_FLAGS) $(VFLAGS) $(VCS_CFILES) -o $@
