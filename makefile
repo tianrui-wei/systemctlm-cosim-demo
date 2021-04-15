@@ -49,9 +49,9 @@ comp: clean
 	#syscan $(SNPS_FLAGS) -cflags "$(SNPS_CFLAGS)" $(C_FILES)
 	$(CC) -c $(SNPS_CFLAGS) $(C_FILES)
 	$(CC) -g -fPIC -shared -o libsc_hier.so *.o
-	# vlogan $(SNPS_FLAGS) -sverilog -ntb_opts uvm
-	#vcs -sysc $(SNPS_FLAGS) -ntb_opts uvm -debug_access+all libsc_hier.so sc_main -lca -timescale=1ns/1ps -o simv2
-	vcs -sysc $(SNPS_FLAGS) -debug_access+all libsc_hier.so sc_main -lca -timescale=1ns/1ps -o simv2
+	vlogan $(SNPS_FLAGS) -sverilog -ntb_opts uvm
+	vcs -sysc $(SNPS_FLAGS) -ntb_opts uvm -debug_access+all libsc_hier.so sc_main -lca -timescale=1ns/1ps -o simv2
+	#vcs -sysc $(SNPS_FLAGS) -debug_access+all libsc_hier.so sc_main -lca -timescale=1ns/1ps -o simv2
 
 clean:
 	rm -rf AN.DB csrc simv2.daidir simv2 work ucli.key vc_hdrs.h DVEfiles *.vpd dir1 *.o *.d *.so  tli_uvm_mem_data.sv *.log
