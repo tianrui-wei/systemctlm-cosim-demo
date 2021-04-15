@@ -3,3 +3,9 @@
 *_demo
 .config.mk
 trace.vcd
+/AN.DB/
+*.portmap
+/csrc/
+/simv2.daidir/
+/stack.info.68218/
+/stack.info.76335/
