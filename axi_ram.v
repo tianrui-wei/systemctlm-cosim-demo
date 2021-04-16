@@ -341,7 +341,7 @@ always @(posedge clk) begin
 
     if (mem_rd_en) begin
         s_axi_rdata_reg <= mem[read_addr_valid];
-	display("Here is a read command\n");
+	$display("Here is a read command\n");
     end
 
     if (!s_axi_rvalid_pipe_reg || s_axi_rready) begin

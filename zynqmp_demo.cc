@@ -121,10 +121,6 @@ SC_MODULE(Top)
     sc_signal<sc_bv<4> >            s_axi_arregion;
     sc_signal<sc_bv<4> >            s_axi_awregion;
 
-    void gen_rst_n() {
-	    rst_n.write(!rst.read());
-    }
-
 	Top(sc_module_name name, const char *sk_descr, sc_time quantum) :
 		zynq("zynq", sk_descr),
 		rst("rst"),
@@ -179,7 +175,6 @@ SC_MODULE(Top)
 		m_qk.set_global_quantum(quantum);
 
 		zynq.rst(rst);
-		SC_METHOD(gen_rst_n);
 		bus   = new iconnect<NR_MASTERS, NR_DEVICES> ("bus");
 		debug = new debugdev("debug");
 		dma = new demodma("demodma");
@@ -331,18 +326,18 @@ int sc_main(int argc, char* argv[])
  //       	socket_name = argv[1];
 //	}
 
-    printf("setting time resolution\n");
 	sc_set_time_resolution(1, SC_PS);
 
-    printf("instantiating top design\n");
 	top = new Top("top", socket_name, sc_time((double) sync_quantum, SC_NS));
 
     printf("realy to pull the reset signal\n");
 	/* Pull the reset signal.  */
 	top->rst.write(true);
+	top->rst_n.write(false);
     printf("start sc_start for reset\n");
 	sc_start(1, SC_US);
 	top->rst.write(false);
+	top->rst_n.write(true);
 
     printf("formal starting the design\n");
 	sc_start(10000000, SC_SEC);

@@ -72,7 +72,7 @@ public:
 	tlm_utils::simple_target_socket<tlm2axi_bridge> tgt_socket;
 
 	tlm2axi_bridge(sc_core::sc_module_name name,
-			AXIVersion version = V_AXI4, bool aligner_enable=true) :
+			AXIVersion version = V_AXI4, bool aligner_enable=false) :
 		sc_module(name),
 		axi_common(this),
 		tgt_socket("target-socket"),
@@ -768,6 +768,7 @@ private:
 			/* Abort transaction if reset is asserted. */
 			if (reset_asserted()) {
 				if (tr) {
+						cout << "INFO: TLM: aborting the reset because reset_n is held high\n" << endl;
 					abort(tr);
 				}
 				wait_for_reset_release();
@@ -785,6 +786,7 @@ private:
 
 	void read_resp_phase()
 	{
+		cout << "INFO: TLM responding to read request" << endl;
 		rready.write(false);
 
 		while (true) {
@@ -806,6 +808,7 @@ private:
 				wait(clk.posedge_event() | resetn.negedge_event());
 
 				if (reset_asserted()) {
+					cout << "INFO: TLM aborting because still in reset" << endl;
 					break;
 				}
 
@@ -886,9 +889,9 @@ private:
 							memcpy(data + pos, &data64, copylen);
 						}
 
-						D(printf("Read addr=%x data64=%lx len=%d readlen=%d pos=%d w=%d sw=%d ofset=%d, copylen=%d\n",
+						printf("Read addr=%x data64=%lx len=%d readlen=%d pos=%d w=%d sw=%d ofset=%d, copylen=%d\n",
 							addr, data64, len, readlen, pos, w, streaming_width,
-							(w * 8 + bitoffset), copylen));
+							(w * 8 + bitoffset), copylen);
 						if (tr->GetBurstType() != AXI_BURST_FIXED) {
 							addr_pos += copylen;
 						}
@@ -927,6 +930,7 @@ private:
 
 					// Reset asserted while rack is being signaled
 					if (reset_asserted()) {
+						cout << "INFO: TLM: aborting the reset because reset_n is held high\n" << endl;
 						abort(tr);
 						wait_for_reset_release();
 						continue;
@@ -939,6 +943,7 @@ private:
 				// Reset is asserted, abort the transaction.
 				//
 				if (tr) {
+						cout << "INFO: TLM: aborting the reset because reset_n is held high\n" << endl;
 					abort(tr);
 				}
 				wait_for_reset_release();
@@ -994,6 +999,7 @@ private:
 				wrResponses.push_back(tr);
 			} else {
 				// In reset
+						cout << "INFO: TLM: aborting the reset because reset_n is held high\n" << endl;
 				abort(tr);
 				wait_for_reset_release();
 			}
@@ -1043,6 +1049,7 @@ private:
 				wack.write(false);
 
 				if (reset_asserted()) {
+						cout << "INFO: TLM: aborting the reset because reset_n is held high\n" << endl;
 					abort(tr);
 					wait_for_reset_release();
 					continue;
