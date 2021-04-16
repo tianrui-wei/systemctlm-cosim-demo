@@ -38,12 +38,10 @@ COSIM_SYSC_FILES = debugdev.cc \
 CXX_FILES = $(RP_CXX_FILES) $(COSIM_SYSC_FILES)
 C_FILES = $(RP_C_FILES)
 
-VFILES = apb_timer.v
-
 comp: clean
 	mkdir work -p
 	echo "compiling c++ files"
-	vlogan $(SNPS_FLAGS) -sysc -sysc=opt_if -sysc=gen_portmap apb_slave_timer.v -sc_model apb_slave_timer
+	vlogan $(SNPS_FLAGS) -sysc -sysc=opt_if -sysc=gen_portmap axi_ram.v -sc_model axi_ram
 	#$(CXX) -c $(SNPS_CXXFLAGS) $(CXX_FILES)
 	syscan $(SNPS_FLAGS) -cflags "$(SNPS_CXXFLAGS)" $(CXX_FILES)
 	#syscan $(SNPS_FLAGS) -cflags "$(SNPS_CFLAGS)" $(C_FILES)
