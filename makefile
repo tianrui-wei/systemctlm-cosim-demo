@@ -1,7 +1,7 @@
 # flags for synopsys tools
-SNPS_FLAGS = -full64 -cpp g++-4.8 -cc gcc-4.8
-CC = gcc-4.8
-CXX = g++-4.8
+SNPS_FLAGS = -full64 -cpp g++-6 -cc gcc-6
+CC = gcc-6
+CXX = g++-6
 SNPS_CFLAGS = -I${PWD}/csrc/sysc/include -I${VCS_HOME}/etc/systemc/tlm/tli -DTLI_BYTE_VIEW_DEBUG  -DVCS  -I${VCS_HOME}/include/systemc231 -I${VCS_HOME}/etc/systemc/tlm/include/tlm -I${VCS_HOME}/include -I${VCS_HOME}/include/cosim/bf -fPIC -g -Og -m64
 SNPS_CXXFLAGS = -I${PWD}/csrc/sysc/include -I${VCS_HOME}/etc/systemc/tlm/tli -DTLI_BYTE_VIEW_DEBUG  -DVCS  -I${VCS_HOME}/include/systemc231 -I${VCS_HOME}/etc/systemc/tlm/include/tlm -I${VCS_HOME}/include -I${VCS_HOME}/include/cosim/bf -fPIC -g -Og -m64
 
@@ -38,14 +38,15 @@ COSIM_SYSC_FILES = debugdev.cc \
 CXX_FILES = $(RP_CXX_FILES) $(COSIM_SYSC_FILES)
 C_FILES = $(RP_C_FILES)
 
-comp: comp_c comp_verilog libsc_hier.so
+comp: comp_verilog comp_c libsc_hier.so
 	mkdir work -p
 	echo "compiling c++ files"
-	vcs -sysc $(SNPS_FLAGS) -ntb_opts uvm -debug_access+all libsc_hier.so sc_main -lca -timescale=1ns/1ps -o simv2
+	vcs -sysc $(SNPS_FLAGS) -ntb_opts uvm -debug_access+all libsc_hier.so sc_main -lca -timescale=1ps/1fs -o simv2
 
 
 comp_verilog: axi_ram.v
 	vlogan $(SNPS_FLAGS) -sysc -sysc=opt_if -sysc=gen_portmap axi_ram.v -sc_model axi_ram
+	vlogan $(SNPS_FLAGS) -sysc axi_ram.v -sc_model axi_ram -sc_portmap axi_ram.portmap
 
 # TODO: finer grain control
 comp_c: $(CXX_FILES) $(C_FILES)
@@ -59,4 +60,4 @@ uvm:
 
 
 clean:
-	rm -rf AN.DB csrc simv2.daidir simv2 work ucli.key vc_hdrs.h DVEfiles *.vpd dir1 *.o *.d *.so  tli_uvm_mem_data.sv *.log
+	rm -rf AN.DB csrc simv2.daidir simv2 work ucli.key vc_hdrs.h DVEfiles *.vpd dir1 *.o *.d *.so  tli_uvm_mem_data.sv *.log *.portmap *.error 64 verdiLog novas.conf
