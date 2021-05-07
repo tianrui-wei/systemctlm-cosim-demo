@@ -11,12 +11,14 @@ LIBSOC_ZYNQMP_PATH=$(LIBSOC_PATH)/zynqmp
 LIBRP_PATH=$(LIBSOC_PATH)/libremote-port
 
 # include files for lib remote port
-SNPS_CXXFLAGS += -I $(LIBRP_PATH)
-SNPS_CFLAGS += -I $(LIBRP_PATH)
+SNPS_CXXFLAGS += -I $(LIBRP_PATH) -I $(LIBSOC_PATH)
+SNPS_CFLAGS += -I $(LIBRP_PATH) -I $(LIBSOC_PATH)
+
 
 #include header files in this directory
-SNPS_CXXFLAGS += -I . -I $(LIBSOC_ZYNQMP_PATH)
-SNPS_CFLAGS += -I . -I $(LIBSOC_ZYNQMP_PATH)
+SNPS_CXXFLAGS += -I . -I $(LIBSOC_ZYNQMP_PATH) -I $(LIBSOC_PATH)
+SNPS_CFLAGS += -I . -I $(LIBSOC_ZYNQMP_PATH) -I $(LIBSOC_PATH)
+
 
 
 RP_C_FILES = $(LIBRP_PATH)/safeio.c \
@@ -41,7 +43,7 @@ C_FILES = $(RP_C_FILES)
 comp: comp_verilog comp_c libsc_hier.so
 	mkdir work -p
 	echo "compiling c++ files"
-	vcs -sysc $(SNPS_FLAGS) -ntb_opts uvm -debug_access+all libsc_hier.so sc_main -lca -timescale=1ps/1fs -o simv2
+	vcs -sysc $(SNPS_FLAGS) -ntb_opts uvm -debug_access+all libsc_hier.so sc_main -lca -timescale=1ns/1ps -o simv2
 
 
 comp_verilog: axi_ram.v

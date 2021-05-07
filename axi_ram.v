@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 // Language: Verilog 2001
 
-`timescale 1ps / 1fs
+`timescale 1ns / 1ps
 
 `define DATA_WIDTH 32
 `define ADDR_WIDTH 8

@@ -319,14 +319,14 @@ int sc_main(int argc, char* argv[])
 	uint64_t sync_quantum;
 
 //	if (argc < 3) {
-		sync_quantum = 1000000000000000;
+		sync_quantum = 100000;
         	socket_name = "unix:/tmp/qemu/qemu-rport-_machine_cosim";
 //	} else {
 //		sync_quantum = strtoull(argv[2], NULL, 10);
  //       	socket_name = argv[1];
 //	}
 
-	sc_set_time_resolution(1, SC_FS);
+	sc_set_time_resolution(1, SC_PS);
 
 	top = new Top("top", socket_name, sc_time((double) sync_quantum, SC_PS));
 
