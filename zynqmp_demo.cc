@@ -326,7 +326,7 @@ int sc_main(int argc, char* argv[])
  //       	socket_name = argv[1];
 //	}
 
-	sc_set_time_resolution(1, SC_PS);
+	sc_set_time_resolution(1, SC_FS);
 
 	top = new Top("top", socket_name, sc_time((double) sync_quantum, SC_PS));
 

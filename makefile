@@ -7,7 +7,7 @@ SNPS_CXXFLAGS = -I${PWD}/csrc/sysc/include -I${VCS_HOME}/etc/systemc/tlm/tli -DT
 
 # path for libremote port
 LIBSOC_PATH=libsystemctlm-soc
-LIBSOC_ZYNQMP_PATH=$(LIBSOC_PATH)/zynqmp
+LIBSOC_ZYNQMP_PATH=$(LIBSOC_PATH)/soc/xilinx/zynqmp
 LIBRP_PATH=$(LIBSOC_PATH)/libremote-port
 
 # include files for lib remote port
@@ -43,7 +43,7 @@ C_FILES = $(RP_C_FILES)
 comp: comp_verilog comp_c libsc_hier.so
 	mkdir work -p
 	echo "compiling c++ files"
-	vcs -sysc $(SNPS_FLAGS) -ntb_opts uvm -debug_access+all libsc_hier.so sc_main -lca -timescale=1ns/1ps -o simv2
+	vcs -sysc $(SNPS_FLAGS) -ntb_opts uvm -debug_access+all libsc_hier.so sc_main -timescale=1ps/1fs -lca -o simv2
 
 
 comp_verilog: axi_ram.v
